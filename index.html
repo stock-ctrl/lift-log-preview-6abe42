@@ -751,7 +751,7 @@ const PERSONAL_MESSAGE = "Happy Father's Day, Pops. I built this tool to weave i
 const PERSONAL_FROM    = "From Stock";
 const DAD_NAME         = "Trevor";
 /* ========================================================================== */
-const APP_VERSION = "preview-a11y";
+const APP_VERSION = "preview-b";
 /* Trevor's profile — saved for the daily brief's age-aware tone and a future
    "strength for his age" feature. Not shown in the app yet. */
 const PROFILE = { age: 50, sex: "male", heightIn: 70, bodyweightLb: 158, bodyFatPct: 10 };
@@ -1528,7 +1528,6 @@ function openSheet(){
   document.getElementById("scrim").classList.add("show");
   document.getElementById("sheet").classList.add("show");
   const s=document.getElementById("exSearch"); s.value=""; renderSheet("");
-  setTimeout(()=>s.focus(),300);
 }
 function closeSheet(){
   document.getElementById("scrim").classList.remove("show");
@@ -1614,6 +1613,19 @@ document.getElementById("clock").onclick=()=>{
 };
 document.getElementById("addExerciseBtn").onclick=openSheet;
 document.getElementById("scrim").onclick=closeSheet;
+(function(){
+  const sheet=document.getElementById("sheet"), list=document.getElementById("exList");
+  let startY=null, dy=0, active=false;
+  sheet.addEventListener("touchstart",e=>{ startY=e.touches[0].clientY; dy=0; active=true; sheet.style.transition="none"; },{passive:true});
+  sheet.addEventListener("touchmove",e=>{
+    if(!active||startY===null) return;
+    const d=e.touches[0].clientY-startY;
+    if(d>6 && list.scrollTop<=0){ dy=d; sheet.style.transform="translateY("+(d-6)+"px)"; e.preventDefault(); }
+  },{passive:false});
+  function endDrag(){ if(!active) return; active=false; sheet.style.transition=""; const dismiss=dy>90; sheet.style.transform=""; if(dismiss) closeSheet(); startY=null; dy=0; }
+  sheet.addEventListener("touchend",endDrag);
+  sheet.addEventListener("touchcancel",endDrag);
+})();
 document.getElementById("exSearch").addEventListener("input",e=>renderSheet(e.target.value));
 document.getElementById("exSearch").addEventListener("keydown",e=>{
   if(e.key==="Enter"){ const v=e.target.value.trim(); if(v) addExercise(v); }
